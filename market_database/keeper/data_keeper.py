@@ -39,14 +39,21 @@ class DataKeeper:
             self.create_database()
         self._check_database()
 
-    def _get_ticker_data_path(self, ticker: str, interval: str) -> Path:
+    def _get_ticker_data_root_path(self, ticker: str, interval: str) -> Path:
         return self.db_path / ticker / interval
 
-    def _read_ticker_data(self, ticker: str, interval: str) -> T.Set[HistoricCandle]:
-        return utils.read_pickle(self._get_ticker_data_path(ticker, interval))
+    def _get_ticker_data_path(self, ticker: str, interval: str, date: datetime.date) -> Path:
+        return self._get_ticker_data_root_path(ticker, interval) / date.isoformat()
 
-    def _write_ticker_data(self, data: T.Set[HistoricCandle], ticker: str, interval: str):
-        ticker_data_path = self._get_ticker_data_path(ticker, interval)
+    def _read_ticker_data(self, ticker: str, interval: str, date: datetime.date) -> T.Set[HistoricCandle]:
+        ticker_data_path = self._get_ticker_data_path(ticker, interval, date)
+        if not ticker_data_path.exists():
+            return set()
+
+        return utils.read_pickle(ticker_data_path)
+
+    def _write_ticker_data(self, data: T.Set[HistoricCandle], ticker: str, interval: str, date: datetime.date):
+        ticker_data_path = self._get_ticker_data_path(ticker, interval, date)
         utils.dump_pickle(data, ticker_data_path)
 
     def get_ticker_data(
@@ -62,5 +69,15 @@ class DataKeeper:
         self._check_ticker(ticker)
         self._check_interval_name(interval)
 
-        ticker_data = self._read_ticker_data(ticker, interval)
-        ticker_data.update(data)
+        ticker_data_root_path = self._get_ticker_data_root_path(ticker, interval)
+        if not ticker_data_root_path.exists():
+            ticker_data_root_path.mkdir(parents=True)
+
+        unique_dates = {candle.time.date() for candle in data}
+        for date in unique_dates:
+            filtered_data = {candle for candle in data if candle.time.date == date}
+
+            ticker_data = self._read_ticker_data(ticker, interval, date)
+            ticker_data.update(filtered_data)
+
+            self._write_ticker_data(ticker_data, ticker, interval, date)
