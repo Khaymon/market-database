@@ -2,3 +2,5 @@ __pycache__
 .ipynb_checkpoints
 *.env
 *.egg-info
+build
+.pytest_cache
