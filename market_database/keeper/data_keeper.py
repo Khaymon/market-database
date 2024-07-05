@@ -75,7 +75,7 @@ class DataKeeper:
 
         unique_dates = {candle.time.date() for candle in data}
         for date in unique_dates:
-            filtered_data = {candle for candle in data if candle.time.date == date}
+            filtered_data = {candle for candle in data if candle.time.date() == date}
 
             ticker_data = self._read_ticker_data(ticker, interval, date)
             ticker_data.update(filtered_data)
