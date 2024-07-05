@@ -7,3 +7,7 @@ def get_ticker_figi(ticker: str) -> str:
         raise NotImplementedError(f"FIGI mapping for ticker {ticker} is not implemented now")
 
     return figi_map[ticker]
+
+
+def get_available_tickers() -> list[str]:
+    return list(utils.get_ticker_figi_map())
