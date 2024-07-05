@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-database"
-version = "1.0.4"
+version = "1.0.5"
 description = "Stocks market database"
 readme = "README.md"
 authors = [{ name = "Viktor Khaymonenko", email = "khaymonenko@gmail.com" }]
